@@ -10,6 +10,11 @@ type User struct {
 	CreatedAt string `json:"created_at"`
 }
 
+type LoginInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type Customer struct {
 	ID        int    `json:"id"`
 	UserID    int    `json:"user_id"`

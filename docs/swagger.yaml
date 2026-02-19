@@ -1,4 +1,12 @@
 basePath: /api
+definitions:
+  structs.LoginInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
 info:
   contact: {}
   description: API restoran
@@ -10,9 +18,26 @@ paths:
       consumes:
       - application/json
       description: Login pakai email dan password
+      parameters:
+      - description: Login input
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/structs.LoginInput'
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
       summary: Login user
       tags:
       - auth

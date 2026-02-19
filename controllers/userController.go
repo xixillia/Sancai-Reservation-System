@@ -51,18 +51,19 @@ func Register(c *gin.Context, db *sql.DB) {
 	c.JSON(http.StatusOK, gin.H{"message": "user registered"})
 }
 
+// Login user
 // @Summary Login user
 // @Description Login pakai email dan password
 // @Tags auth
 // @Accept json
 // @Produce json
+// @Param request body structs.LoginInput true "Login input"
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
 // @Router /api/login [post]
 func Login(c *gin.Context, db *sql.DB) {
 	var user structs.User
-	var input struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var input structs.LoginInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
