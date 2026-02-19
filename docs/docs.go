@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/login": {
+        "/login": {
             "post": {
                 "description": "Login pakai email dan password",
                 "consumes": [

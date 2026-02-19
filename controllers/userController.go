@@ -60,7 +60,7 @@ func Register(c *gin.Context, db *sql.DB) {
 // @Param request body structs.LoginInput true "Login input"
 // @Success 200 {object} map[string]interface{}
 // @Failure 401 {object} map[string]interface{}
-// @Router /api/login [post]
+// @Router /login [post]
 func Login(c *gin.Context, db *sql.DB) {
 	var user structs.User
 	var input structs.LoginInput

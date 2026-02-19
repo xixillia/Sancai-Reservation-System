@@ -13,7 +13,7 @@ info:
   title: Sancai API
   version: "1.0"
 paths:
-  /api/login:
+  /login:
     post:
       consumes:
       - application/json
