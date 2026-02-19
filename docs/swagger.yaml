@@ -333,7 +333,7 @@ paths:
       - BearerAuth: []
       summary: Ambil semua menu
       tags:
-      - MenuItem
+      - Menu
     post:
       consumes:
       - application/json
@@ -362,7 +362,7 @@ paths:
       - BearerAuth: []
       summary: Tambah menu baru
       tags:
-      - MenuItem
+      - Menu
   /menu/{id}:
     delete:
       description: Menghapus item menu dari database berdasarkan ID
@@ -389,7 +389,7 @@ paths:
       - BearerAuth: []
       summary: Hapus menu
       tags:
-      - MenuItem
+      - Menu
     get:
       description: Mengambil data detail satu item menu menggunakan parameter ID
       parameters:
@@ -421,7 +421,7 @@ paths:
       - BearerAuth: []
       summary: Ambil menu berdasarkan ID
       tags:
-      - MenuItem
+      - Menu
     put:
       consumes:
       - application/json
@@ -457,7 +457,7 @@ paths:
       - BearerAuth: []
       summary: Update data menu
       tags:
-      - MenuItem
+      - Menu
   /menu/{id}/availability:
     patch:
       consumes:
@@ -494,7 +494,7 @@ paths:
       - BearerAuth: []
       summary: Update ketersediaan menu
       tags:
-      - MenuItem
+      - Menu
   /register:
     post:
       consumes:
@@ -532,6 +532,215 @@ paths:
       summary: Register user
       tags:
       - User
+  /reservations:
+    get:
+      description: Mengambil semua data reservasi yang terdaftar di sistem
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/structs.Reservation'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil semua reservasi
+      tags:
+      - Reservation
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan data reservasi baru ke sistem
+      parameters:
+      - description: Data Reservasi
+        in: body
+        name: reservation
+        required: true
+        schema:
+          $ref: '#/definitions/structs.Reservation'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/structs.Reservation'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Buat reservasi baru
+      tags:
+      - Reservation
+  /reservations/{id}:
+    delete:
+      description: Menghapus record reservasi dari database
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Hapus reservasi
+      tags:
+      - Reservation
+    get:
+      description: Mengambil informasi detail satu reservasi menggunakan ID
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/structs.Reservation'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil reservasi berdasarkan ID
+      tags:
+      - Reservation
+    put:
+      consumes:
+      - application/json
+      description: Mengubah informasi customer, meja, waktu, atau status reservasi
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Data Reservasi
+        in: body
+        name: reservation
+        required: true
+        schema:
+          $ref: '#/definitions/structs.Reservation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update data reservasi
+      tags:
+      - Reservation
+  /reservations/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Mengubah status (pending/confirmed/cancelled/completed)
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Cukup isi field status
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/structs.Reservation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update status reservasi
+      tags:
+      - Reservation
+  /reservations/{id}/total:
+    get:
+      description: Menghitung jumlah (quantity * price) dari semua item yang dipesan
+        dalam satu reservasi
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'Contoh: {"total": 150000}'
+          schema:
+            additionalProperties:
+              format: float64
+              type: number
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil total harga reservasi
+      tags:
+      - Reservation
   /tables:
     get:
       description: Mengambil daftar lengkap meja beserta statusnya

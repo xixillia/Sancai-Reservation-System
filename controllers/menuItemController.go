@@ -11,7 +11,7 @@ import (
 // GetMenuItems menampilkan semua daftar menu
 // @Summary Ambil semua menu
 // @Description Mengambil daftar lengkap item menu makanan dan minuman
-// @Tags MenuItem
+// @Tags Menu
 // @Security BearerAuth
 // @Produce json
 // @Success 200 {array} structs.MenuItem
@@ -41,7 +41,7 @@ func GetMenuItems(c *gin.Context, DB *sql.DB) {
 // GetMenuItemByID menampilkan detail satu menu
 // @Summary Ambil menu berdasarkan ID
 // @Description Mengambil data detail satu item menu menggunakan parameter ID
-// @Tags MenuItem
+// @Tags Menu
 // @Security BearerAuth
 // @Produce json
 // @Param id path int true "Menu Item ID"
@@ -67,7 +67,7 @@ func GetMenuItemByID(c *gin.Context, DB *sql.DB) {
 // CreateMenuItem menambah item menu baru
 // @Summary Tambah menu baru
 // @Description Menambahkan item menu baru ke dalam sistem (Admin Only)
-// @Tags MenuItem
+// @Tags Menu
 // @Security BearerAuth
 // @Accept json
 // @Produce json
@@ -93,7 +93,7 @@ func CreateMenuItem(c *gin.Context, DB *sql.DB) {
 // UpdateMenuItem memperbarui data menu
 // @Summary Update data menu
 // @Description Mengubah nama, harga, atau status ketersediaan menu
-// @Tags MenuItem
+// @Tags Menu
 // @Security BearerAuth
 // @Accept json
 // @Produce json
@@ -133,7 +133,7 @@ func UpdateMenuItem(c *gin.Context, DB *sql.DB) {
 // DeleteMenuItem menghapus item menu
 // @Summary Hapus menu
 // @Description Menghapus item menu dari database berdasarkan ID
-// @Tags MenuItem
+// @Tags Menu
 // @Security BearerAuth
 // @Param id path int true "Menu Item ID"
 // @Success 200 {object} map[string]string
@@ -164,7 +164,7 @@ func DeleteMenuItem(c *gin.Context, DB *sql.DB) {
 // UpdateMenuItemAvailability mengubah status ketersediaan menu
 // @Summary Update ketersediaan menu
 // @Description Mengubah status ketersediaan (available true/false) secara cepat
-// @Tags MenuItem
+// @Tags Menu
 // @Security BearerAuth
 // @Accept json
 // @Produce json

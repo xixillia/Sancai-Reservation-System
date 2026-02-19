@@ -8,6 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetReservations menampilkan semua daftar reservasi
+// @Summary Ambil semua reservasi
+// @Description Mengambil semua data reservasi yang terdaftar di sistem
+// @Tags Reservation
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {array} structs.Reservation
+// @Failure 500 {object} map[string]string
+// @Router /reservations [get]
 func GetReservations(c *gin.Context, DB *sql.DB) {
 	var reservations []structs.Reservation
 	rows, err := DB.Query("SELECT id, customer_id, table_id, reservation_datetime, status FROM reservations")
@@ -28,6 +37,16 @@ func GetReservations(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, reservations)
 }
 
+// GetReservationByID menampilkan detail satu reservasi
+// @Summary Ambil reservasi berdasarkan ID
+// @Description Mengambil informasi detail satu reservasi menggunakan ID
+// @Tags Reservation
+// @Security BearerAuth
+// @Produce json
+// @Param id path int true "Reservation ID"
+// @Success 200 {object} structs.Reservation
+// @Failure 404 {object} map[string]string
+// @Router /reservations/{id} [get]
 func GetReservationByID(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var reservation structs.Reservation
@@ -43,6 +62,17 @@ func GetReservationByID(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, reservation)
 }
 
+// CreateReservation membuat reservasi baru
+// @Summary Buat reservasi baru
+// @Description Menambahkan data reservasi baru ke sistem
+// @Tags Reservation
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param reservation body structs.Reservation true "Data Reservasi"
+// @Success 201 {object} structs.Reservation
+// @Failure 400 {object} map[string]string
+// @Router /reservations [post]
 func CreateReservation(c *gin.Context, DB *sql.DB) {
 	var reservation structs.Reservation
 	if err := c.ShouldBindJSON(&reservation); err != nil {
@@ -59,6 +89,18 @@ func CreateReservation(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusCreated, reservation)
 }
 
+// UpdateReservation memperbarui data reservasi
+// @Summary Update data reservasi
+// @Description Mengubah informasi customer, meja, waktu, atau status reservasi
+// @Tags Reservation
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path int true "Reservation ID"
+// @Param reservation body structs.Reservation true "Update Data Reservasi"
+// @Success 200 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /reservations/{id} [put]
 func UpdateReservation(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var reservation structs.Reservation
@@ -86,6 +128,18 @@ func UpdateReservation(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, gin.H{"message": "Reservation updated successfully"})
 }
 
+// UpdateReservationStatus mengubah status reservasi
+// @Summary Update status reservasi
+// @Description Mengubah status (pending/confirmed/cancelled/completed)
+// @Tags Reservation
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path int true "Reservation ID"
+// @Param status body structs.Reservation true "Cukup isi field status"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Router /reservations/{id}/status [patch]
 func UpdateReservationStatus(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var status struct {
@@ -117,6 +171,15 @@ func UpdateReservationStatus(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, gin.H{"message": "Reservation status updated successfully"})
 }
 
+// DeleteReservation menghapus data reservasi
+// @Summary Hapus reservasi
+// @Description Menghapus record reservasi dari database
+// @Tags Reservation
+// @Security BearerAuth
+// @Param id path int true "Reservation ID"
+// @Success 200 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /reservations/{id} [delete]
 func DeleteReservation(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	query := "DELETE FROM reservations WHERE id = $1"
@@ -139,10 +202,20 @@ func DeleteReservation(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, gin.H{"message": "Reservation deleted successfully"})
 }
 
+// GetTotalByReservationID menghitung total biaya pesanan
+// @Summary Ambil total harga reservasi
+// @Description Menghitung jumlah (quantity * price) dari semua item yang dipesan dalam satu reservasi
+// @Tags Reservation
+// @Security BearerAuth
+// @Produce json
+// @Param id path int true "Reservation ID"
+// @Success 200 {object} map[string]float64 "Contoh: {"total": 150000}"
+// @Failure 500 {object} map[string]string
+// @Router /reservations/{id}/total [get]
 func GetTotalByReservationID(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var total float64
-	query := `SELECT SUM(quantity * price_at_order) FROM reservation_orders WHERE reservation_id = $1`
+	query := `SELECT COALESCE(SUM(quantity * price_at_order), 0) FROM reservation_orders WHERE reservation_id = $1`
 	if err := DB.QueryRow(query, id).Scan(&total); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
