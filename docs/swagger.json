@@ -6,6 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
+    "host": "sancai-reservation-system-production.up.railway.app",
     "basePath": "/api",
     "paths": {
         "/login": {
@@ -532,6 +533,14 @@
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Ketik: \"Bearer [spasi] token_anda\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

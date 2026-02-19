@@ -27,7 +27,13 @@ var (
 // @title Sancai API
 // @version 1.0
 // @description API restoran
+// @host sancai-reservation-system-production.up.railway.app
 // @BasePath /api
+
+// @securityDefinitions.apiKey BearerAuth
+// @in header
+// @name Authorization
+// @description Ketik: "Bearer [spasi] token_anda"
 func main() {
 	// local
 	// psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+

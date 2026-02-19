@@ -540,13 +540,21 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Ketik: \"Bearer [spasi] token_anda\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "",
+	Host:             "sancai-reservation-system-production.up.railway.app",
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Sancai API",
