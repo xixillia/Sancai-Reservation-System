@@ -5,6 +5,7 @@ import (
 	"Sancai/routers"
 	"database/sql"
 	"fmt"
+	"os"
 
 	_ "github.com/lib/pq"
 )
@@ -14,30 +15,32 @@ var (
 	err error
 )
 
-const (
-	host     = "localhost"
-	port     = "5432"
-	user     = "postgres"
-	password = "1234"
-	dbname   = "sancai_db"
-)
+// local
+// const (
+// 	host     = "localhost"
+// 	port     = "5432"
+// 	user     = "postgres"
+// 	password = "1234"
+// 	dbname   = "sancai_db"
+// )
 
 // @title Sancai API
 // @version 1.0
 // @description API restoran
 // @BasePath /api
 func main() {
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
-
+	// local
 	// psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
 	// 	"password=%s dbname=%s sslmode=disable",
-	// 	os.Getenv("PGHOST"),
-	// 	os.Getenv("PGPORT"),
-	// 	os.Getenv("PGUSER"),
-	// 	os.Getenv("PGPASSWORD"),
-	// 	os.Getenv("PGDATABASE"))
+	// 	host, port, user, password, dbname)
+
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		os.Getenv("PGHOST"),
+		os.Getenv("PGPORT"),
+		os.Getenv("PGUSER"),
+		os.Getenv("PGPASSWORD"),
+		os.Getenv("PGDATABASE"))
 
 	DB, err = sql.Open("postgres", psqlInfo)
 	if err != nil {
@@ -49,6 +52,8 @@ func main() {
 	defer DB.Close()
 
 	router := routers.StartServer(DB)
-	router.Run(":8080")
-	// router.Run(":" + os.Getenv("PORT"))
+	router.Run(":" + os.Getenv("PORT"))
+
+	// local
+	// router.Run(":8080")
 }
