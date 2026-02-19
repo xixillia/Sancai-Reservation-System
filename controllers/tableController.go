@@ -8,6 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetTables menampilkan semua daftar meja
+// @Summary Ambil semua meja
+// @Description Mengambil daftar lengkap meja beserta statusnya
+// @Tags Tables
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {array} structs.Table
+// @Failure 500 {object} map[string]string
+// @Router /tables [get]
 func GetTables(c *gin.Context, DB *sql.DB) {
 	var tables []structs.Table
 	rows, err := DB.Query("SELECT id, table_number, capacity, status FROM tables")
@@ -29,6 +38,17 @@ func GetTables(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, tables)
 }
 
+// GetTablesByID menampilkan detail satu meja
+// @Summary Ambil meja berdasarkan ID
+// @Description Mengambil data detail satu meja menggunakan parameter ID
+// @Tags Tables
+// @Security BearerAuth
+// @Produce json
+// @Param id path int true "Table ID"
+// @Success 200 {object} structs.Table
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /tables/{id} [get]
 func GetTablesByID(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var table structs.Table
@@ -45,6 +65,18 @@ func GetTablesByID(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, table)
 }
 
+// CreateTable membuat data meja baru
+// @Summary Tambah meja baru
+// @Description Menambahkan meja ke sistem (Admin Only)
+// @Tags Tables
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param table body structs.Table true "Data Meja"
+// @Success 201 {object} structs.Table
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /tables [post]
 func CreateTable(c *gin.Context, DB *sql.DB) {
 	var table structs.Table
 	if err := c.ShouldBindJSON(&table); err != nil {
@@ -78,6 +110,19 @@ func CreateTable(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusCreated, table)
 }
 
+// UpdateTable memperbarui data meja
+// @Summary Update info meja
+// @Description Mengubah nomor meja, kapasitas, atau status
+// @Tags Tables
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path int true "Table ID"
+// @Param table body structs.Table true "Update Data Meja"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /tables/{id} [put]
 func UpdateTable(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var table structs.Table
@@ -86,7 +131,7 @@ func UpdateTable(c *gin.Context, DB *sql.DB) {
 		return
 	}
 
-	if table.TableNumber == "" || table.Capacity <= 0 || (table.Status != "available" && table.Status != "unavailable") {
+	if table.TableNumber == "" || table.Capacity <= 0 || (table.Status != "available" && table.Status != "reserved" && table.Status != "occupied") {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid table data"})
 		return
 	}
@@ -110,6 +155,16 @@ func UpdateTable(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, gin.H{"message": "Tables updated successfully"})
 }
 
+// DeleteTable menghapus meja
+// @Summary Hapus meja
+// @Description Menghapus meja jika tidak ada reservasi aktif di masa depan
+// @Tags Tables
+// @Security BearerAuth
+// @Param id path int true "Table ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /tables/{id} [delete]
 func DeleteTable(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 
@@ -143,6 +198,18 @@ func DeleteTable(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, gin.H{"message": "Tables deleted successfully"})
 }
 
+// UpdateTableStatus mengubah status meja saja
+// @Summary Update status meja
+// @Description Mengubah status (available/reserved/occupied) secara spesifik
+// @Tags Tables
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path int true "Table ID"
+// @Param status body struct{Status string `json:"status" example:"available"`} true "Status Baru"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Router /tables/{id}/status [patch]
 func UpdateTableStatus(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var status struct {
@@ -175,6 +242,17 @@ func UpdateTableStatus(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, gin.H{"message": "Tables status updated successfully"})
 }
 
+// GetAvailableTables mencari meja yang tersedia
+// @Summary Cari meja tersedia
+// @Description Mencari meja berdasarkan jumlah tamu dan waktu tertentu yang tidak bentrok dengan reservasi lain
+// @Tags Tables
+// @Security BearerAuth
+// @Produce json
+// @Param datetime query string true "Format: YYYY-MM-DD HH:MM:SS" example("2026-02-20 19:00:00")
+// @Param guests query int true "Jumlah tamu" example(4)
+// @Success 200 {array} structs.Table
+// @Failure 500 {object} map[string]string
+// @Router /tables/available [get]
 func GetAvailableTables(c *gin.Context, DB *sql.DB) {
 	datetime := c.Query("datetime")
 	guests := c.Query("guests")
@@ -185,10 +263,10 @@ func GetAvailableTables(c *gin.Context, DB *sql.DB) {
 		WHERE t.capacity >= $1 AND t.status = 'available' AND t.id NOT IN (
 			SELECT r.table_id
 			FROM reservations r
-			WHERE ABS(TIMESTAMPDIFF(MINUTE, r.reservation_datetime, $2)) < 60
+			WHERE ABS(EXTRACT(EPOCH FROM (r.reservation_datetime - $2::timestamp)) / 60) < 60
 				AND r.status IN ('confirmed', 'pending')
 		)
-		ORDER BY t.number
+		ORDER BY t.table_number
 	`
 	rows, err := DB.Query(query, guests, datetime)
 	if err != nil {

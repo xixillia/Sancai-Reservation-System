@@ -14,7 +14,7 @@ import (
 // Register user baru
 // @Summary Register user
 // @Description Mendaftarkan user baru ke sistem dengan name, email, password, dan role
-// @Tags auth
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param user body structs.User true "Data User Baru"
@@ -65,7 +65,7 @@ func Register(c *gin.Context, db *sql.DB) {
 // Login user
 // @Summary Login user
 // @Description Login pakai email dan password
-// @Tags auth
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param request body structs.LoginInput true "Login input"
