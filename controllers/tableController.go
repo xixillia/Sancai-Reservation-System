@@ -11,7 +11,7 @@ import (
 // GetTables menampilkan semua daftar meja
 // @Summary Ambil semua meja
 // @Description Mengambil daftar lengkap meja beserta statusnya
-// @Tags Tables
+// @Tags Table
 // @Security BearerAuth
 // @Produce json
 // @Success 200 {array} structs.Table
@@ -41,7 +41,7 @@ func GetTables(c *gin.Context, DB *sql.DB) {
 // GetTablesByID menampilkan detail satu meja
 // @Summary Ambil meja berdasarkan ID
 // @Description Mengambil data detail satu meja menggunakan parameter ID
-// @Tags Tables
+// @Tags Table
 // @Security BearerAuth
 // @Produce json
 // @Param id path int true "Table ID"
@@ -68,7 +68,7 @@ func GetTablesByID(c *gin.Context, DB *sql.DB) {
 // CreateTable membuat data meja baru
 // @Summary Tambah meja baru
 // @Description Menambahkan meja ke sistem (Admin Only)
-// @Tags Tables
+// @Tags Table
 // @Security BearerAuth
 // @Accept json
 // @Produce json
@@ -113,7 +113,7 @@ func CreateTable(c *gin.Context, DB *sql.DB) {
 // UpdateTable memperbarui data meja
 // @Summary Update info meja
 // @Description Mengubah nomor meja, kapasitas, atau status
-// @Tags Tables
+// @Tags Table
 // @Security BearerAuth
 // @Accept json
 // @Produce json
@@ -158,7 +158,7 @@ func UpdateTable(c *gin.Context, DB *sql.DB) {
 // DeleteTable menghapus meja
 // @Summary Hapus meja
 // @Description Menghapus meja jika tidak ada reservasi aktif di masa depan
-// @Tags Tables
+// @Tags Table
 // @Security BearerAuth
 // @Param id path int true "Table ID"
 // @Success 200 {object} map[string]string
@@ -201,7 +201,7 @@ func DeleteTable(c *gin.Context, DB *sql.DB) {
 // UpdateTableStatus mengubah status meja saja
 // @Summary Update status meja
 // @Description Mengubah status (available/reserved/occupied) secara spesifik
-// @Tags Tables
+// @Tags Table
 // @Security BearerAuth
 // @Accept json
 // @Produce json
@@ -245,7 +245,7 @@ func UpdateTableStatus(c *gin.Context, DB *sql.DB) {
 // GetAvailableTables mencari meja yang tersedia
 // @Summary Cari meja tersedia
 // @Description Mencari meja berdasarkan jumlah tamu dan waktu tertentu yang tidak bentrok dengan reservasi lain
-// @Tags Tables
+// @Tags Table
 // @Security BearerAuth
 // @Produce json
 // @Param datetime query string true "Format: YYYY-MM-DD HH:MM:SS" example("2026-02-20 19:00:00")
