@@ -1,0 +1,11 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\controllers",
+    "\\database\\sql_migrations",
+    "\\routers",
+    "\\structs"
+  ],
+  "SelectedNode": "\\Note.txt",
+  "PreviewInSolutionExplorer": false
+}

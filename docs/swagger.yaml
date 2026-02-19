@@ -1,0 +1,19 @@
+basePath: /api
+info:
+  contact: {}
+  description: API restoran
+  title: Sancai API
+  version: "1.0"
+paths:
+  /api/login:
+    post:
+      consumes:
+      - application/json
+      description: Login pakai email dan password
+      produces:
+      - application/json
+      responses: {}
+      summary: Login user
+      tags:
+      - auth
+swagger: "2.0"

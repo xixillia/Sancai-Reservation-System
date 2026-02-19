@@ -1,0 +1,298 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: My Collection
+meta:
+  id: wrk_b9b69ab9aef044cd9ba7d2d63c003bff
+  created: 1771515930081
+  modified: 1771515930081
+  description: ""
+collection:
+  - name: Customers
+    meta:
+      id: fld_11930a6572e049d8a3908087cfb1a310
+      created: 1771533470043
+      modified: 1771533472070
+      sortKey: -1771531945295.25
+      description: ""
+    children:
+      - url: "{{ _.base_url }}/api/customers"
+        name: Get Customers
+        meta:
+          id: req_8fdb6a4b8796408a9a966601386d652b
+          created: 1771531945157
+          modified: 1771535200347
+          isPrivate: false
+          description: ""
+          sortKey: -1771533475429
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        authentication:
+          type: bearer
+          disabled: false
+          token: "{% response 'body', 'req_080c5f53001e4626a04c8dae54524f10',
+            'b64::JC50b2tlbg==::46b', 'always', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Users
+    meta:
+      id: fld_3cc0ae9b4eb94cbc83607778c90235bd
+      created: 1771533487904
+      modified: 1771533487904
+      sortKey: -1771533487904
+      description: ""
+    children:
+      - url: "{{ _.base_url }}/api/login"
+        name: Login
+        meta:
+          id: req_080c5f53001e4626a04c8dae54524f10
+          created: 1771531945710
+          modified: 1771533573091
+          isPrivate: false
+          description: ""
+          sortKey: -1771533573056
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "password":"xixil",
+              "email":"xixilsun17@gmail.com"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/api/register"
+        name: Register
+        meta:
+          id: req_2c269e02dee54d289458266f137b79ca
+          created: 1771532313894
+          modified: 1771533652473
+          isPrivate: false
+          description: ""
+          sortKey: -1771533573156
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name":"Xixil", 
+              "password":"xixil",
+              "email":"xixilsun17@gmail.com",
+              "role":"admin",
+              "is_active":true
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: MenuItems
+    meta:
+      id: fld_3353d9580d2241dbb9ba3b75d5b1efa5
+      created: 1771533495513
+      modified: 1771533563244
+      sortKey: -1771531945424.8594
+      description: ""
+    children:
+      - url: "{{ _.base_url }}/api/customers"
+        name: Get MenuItems
+        meta:
+          id: req_753dc3c89e8b4fa8b46a502a42f87b39
+          created: 1771535183648
+          modified: 1771535213010
+          isPrivate: false
+          description: ""
+          sortKey: -1771535212963
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        authentication:
+          type: bearer
+          disabled: false
+          token: "{% response 'body', 'req_080c5f53001e4626a04c8dae54524f10',
+            'b64::JC50b2tlbg==::46b', 'always', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: ReservationOrders
+    meta:
+      id: fld_684220a0ca2648738822cd2b0953e69c
+      created: 1771533503399
+      modified: 1771533561011
+      sortKey: -1771531945416.2188
+      description: ""
+    children:
+      - url: "{{ _.base_url }}/api/customers"
+        name: Get ReservationOrders
+        meta:
+          id: req_02763de261014add8e13256f4104ea5f
+          created: 1771535191973
+          modified: 1771535203105
+          isPrivate: false
+          description: ""
+          sortKey: -1771535203060
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        authentication:
+          type: bearer
+          disabled: false
+          token: "{% response 'body', 'req_080c5f53001e4626a04c8dae54524f10',
+            'b64::JC50b2tlbg==::46b', 'always', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Reservations
+    meta:
+      id: fld_65736c82d94b496aad27cb36b1954a5c
+      created: 1771533533373
+      modified: 1771533558794
+      sortKey: -1771531945398.9375
+      description: ""
+    children:
+      - url: "{{ _.base_url }}/api/customers"
+        name: Get Reservations
+        meta:
+          id: req_e0d8121239634577971b1250b743f8ed
+          created: 1771535229890
+          modified: 1771535245718
+          isPrivate: false
+          description: ""
+          sortKey: -1771535245674
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        authentication:
+          type: bearer
+          disabled: false
+          token: "{% response 'body', 'req_080c5f53001e4626a04c8dae54524f10',
+            'b64::JC50b2tlbg==::46b', 'always', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Tables
+    meta:
+      id: fld_91145f8beb4842a78806bf1894972cd8
+      created: 1771533552378
+      modified: 1771533557172
+      sortKey: -1771531945364.375
+      description: ""
+    children:
+      - url: "{{ _.base_url }}/api/customers"
+        name: Get Tables
+        meta:
+          id: req_19a8119e24ea45eeaccf91ee5c919464
+          created: 1771535223409
+          modified: 1771535238679
+          isPrivate: false
+          description: ""
+          sortKey: -1771535238619
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        authentication:
+          type: bearer
+          disabled: false
+          token: "{% response 'body', 'req_080c5f53001e4626a04c8dae54524f10',
+            'b64::JC50b2tlbg==::46b', 'always', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_2f5c76e53221198f7f70c70d6457c88eb2bee4c0
+    created: 1771515930087
+    modified: 1771515930087
+environments:
+  name: Base Environment
+  meta:
+    id: env_2f5c76e53221198f7f70c70d6457c88eb2bee4c0
+    created: 1771515930084
+    modified: 1771531991615
+    isPrivate: false
+  data:
+    "": ""
+  subEnvironments:
+    - name: Local
+      meta:
+        id: env_c6623de310cf4b4a993d29edbbccde76
+        created: 1771532001345
+        modified: 1771532068532
+        isPrivate: true
+        sortKey: 1771532001345
+      data:
+        base_url: http://localhost:8080
+    - name: Railway
+      meta:
+        id: env_1b1fd597645d453ba250cc1bc4793819
+        created: 1771532017129
+        modified: 1771532088996
+        isPrivate: true
+        sortKey: 1771532017129
+      data:
+        base_url: https://railway

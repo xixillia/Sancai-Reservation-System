@@ -1,12 +1,29 @@
 -- +migrate Up
 
+-- users
+CREATE TABLE users (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role VARCHAR(50) NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 -- customers
 CREATE TABLE customers (
   id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NULL,
   name VARCHAR(150) NOT NULL,
-  email VARCHAR(150),
-  phone VARCHAR(50),
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+  email VARCHAR(150) NOT NULL,
+  phone VARCHAR(50) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT fk_customers_user
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE RESTRICT
 );
 
 -- tables (meja restoran)
@@ -42,7 +59,7 @@ CREATE TABLE reservations (
 CREATE TABLE menu_items (
   id BIGSERIAL PRIMARY KEY,
   name VARCHAR(150) NOT NULL,
-  price NUMERIC(12,2) NOT NULL,
+  price NUMERIC(15,2) NOT NULL,
   category VARCHAR(100),
   is_available BOOLEAN NOT NULL DEFAULT TRUE
 );
@@ -53,7 +70,7 @@ CREATE TABLE reservation_orders (
   reservation_id BIGINT NOT NULL,
   menu_item_id BIGINT NOT NULL,
   quantity INT NOT NULL,
-  price_at_order NUMERIC(12,2) NOT NULL,
+  price_at_order NUMERIC(15,2) NOT NULL,
 
   CONSTRAINT fk_orders_reservation
     FOREIGN KEY (reservation_id)
