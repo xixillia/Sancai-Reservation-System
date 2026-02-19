@@ -35,7 +35,7 @@ func StartServer(db *sql.DB) *gin.Engine {
 			customerRoutes.DELETE("/:id", func(c *gin.Context) { controllers.DeleteCustomer(c, db) })
 		}
 		// MenuItem routes
-		menuItemRoutes := api.Group("/menu-items")
+		menuItemRoutes := api.Group("/menus")
 		{
 			menuItemRoutes.GET("", func(c *gin.Context) { controllers.GetMenuItems(c, db) })
 			menuItemRoutes.GET("/:id", func(c *gin.Context) { controllers.GetMenuItemByID(c, db) })

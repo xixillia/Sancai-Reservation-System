@@ -16,7 +16,7 @@ import (
 // @Produce json
 // @Success 200 {array} structs.MenuItem
 // @Failure 500 {object} map[string]string
-// @Router /menu [get]
+// @Router /menus [get]
 func GetMenuItems(c *gin.Context, DB *sql.DB) {
 	var menuItems []structs.MenuItem
 	rows, err := DB.Query("SELECT id, name, price, is_available FROM menu_items")
@@ -48,7 +48,7 @@ func GetMenuItems(c *gin.Context, DB *sql.DB) {
 // @Success 200 {object} structs.MenuItem
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /menu/{id} [get]
+// @Router /menus/{id} [get]
 func GetMenuItemByID(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var menuItem structs.MenuItem
@@ -74,7 +74,7 @@ func GetMenuItemByID(c *gin.Context, DB *sql.DB) {
 // @Param menu body structs.MenuItem true "Data Menu Item"
 // @Success 201 {object} structs.MenuItem
 // @Failure 400 {object} map[string]string
-// @Router /menu [post]
+// @Router /menus [post]
 func CreateMenuItem(c *gin.Context, DB *sql.DB) {
 	var menuItem structs.MenuItem
 	if err := c.ShouldBindJSON(&menuItem); err != nil {
@@ -101,7 +101,7 @@ func CreateMenuItem(c *gin.Context, DB *sql.DB) {
 // @Param menu body structs.MenuItem true "Update Data Menu"
 // @Success 200 {object} map[string]string
 // @Failure 404 {object} map[string]string
-// @Router /menu/{id} [put]
+// @Router /menus/{id} [put]
 func UpdateMenuItem(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var menuItem structs.MenuItem
@@ -138,7 +138,7 @@ func UpdateMenuItem(c *gin.Context, DB *sql.DB) {
 // @Param id path int true "Menu Item ID"
 // @Success 200 {object} map[string]string
 // @Failure 404 {object} map[string]string
-// @Router /menu/{id} [delete]
+// @Router /menus/{id} [delete]
 func DeleteMenuItem(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	query := "DELETE FROM menu_items WHERE id = $1"
@@ -172,7 +172,7 @@ func DeleteMenuItem(c *gin.Context, DB *sql.DB) {
 // @Param availability body structs.MenuItem true "Cukup isi field is_available"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
-// @Router /menu/{id}/availability [patch]
+// @Router /menus/{id}/availability [patch]
 func UpdateMenuItemAvailability(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var availability struct {

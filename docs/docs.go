@@ -362,7 +362,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/menu": {
+        "/menus": {
             "get": {
                 "security": [
                     {
@@ -445,7 +445,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/menu/{id}": {
+        "/menus/{id}": {
             "get": {
                 "security": [
                     {
@@ -594,7 +594,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/menu/{id}/availability": {
+        "/menus/{id}/availability": {
             "patch": {
                 "security": [
                     {
@@ -920,6 +920,209 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reservations/{id}/orders": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Mengambil semua item menu yang dipesan beserta kuantitas dan harga saat dipesan",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ReservationOrder"
+                ],
+                "summary": "Ambil daftar pesanan per reservasi",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Reservation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/structs.ReservationOrder"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Menambahkan item menu (menu_item_id) dan jumlahnya ke dalam reservasi tertentu",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ReservationOrder"
+                ],
+                "summary": "Tambah pesanan baru",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Reservation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Data Pesanan Item",
+                        "name": "order",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/structs.ReservationOrder"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/structs.ReservationOrder"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reservations/{id}/orders/{order_id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Mengubah jumlah pesanan berdasarkan Order ID dan Reservation ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ReservationOrder"
+                ],
+                "summary": "Update kuantitas pesanan",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Reservation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Kuantitas (cukup field quantity)",
+                        "name": "order",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/structs.ReservationOrder"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Menghapus satu item menu yang sudah dipesan dari daftar reservasi",
+                "tags": [
+                    "ReservationOrder"
+                ],
+                "summary": "Hapus pesanan item",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Reservation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1485,6 +1688,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "table_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "structs.ReservationOrder": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "menu_item_id": {
+                    "type": "integer"
+                },
+                "menu_item_name": {
+                    "type": "string"
+                },
+                "price_at_order": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "reservation_id": {
                     "type": "integer"
                 }
             }

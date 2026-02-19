@@ -19,7 +19,7 @@ import (
 // @Router /reservations [get]
 func GetReservations(c *gin.Context, DB *sql.DB) {
 	var reservations []structs.Reservation
-	rows, err := DB.Query("SELECT id, customer_id, table_id, reservation_datetime, status FROM reservations")
+	rows, err := DB.Query("SELECT id, customer_id, table_id, reservation_datetime, status, number_of_guests, created_at FROM reservations")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -28,7 +28,7 @@ func GetReservations(c *gin.Context, DB *sql.DB) {
 
 	for rows.Next() {
 		var reservation structs.Reservation
-		if err := rows.Scan(&reservation.ID, &reservation.CustomerID, &reservation.TableID, &reservation.ReservationDatetime, &reservation.Status); err != nil {
+		if err := rows.Scan(&reservation.ID, &reservation.CustomerID, &reservation.TableID, &reservation.ReservationDatetime, &reservation.Status, &reservation.NumberOfGuests, &reservation.CreatedAt); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}

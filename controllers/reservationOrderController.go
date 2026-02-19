@@ -8,6 +8,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetOrdersByReservationID menampilkan semua item yang dipesan dalam satu reservasi
+// @Summary Ambil daftar pesanan per reservasi
+// @Description Mengambil semua item menu yang dipesan beserta kuantitas dan harga saat dipesan
+// @Tags ReservationOrder
+// @Security BearerAuth
+// @Produce json
+// @Param id path int true "Reservation ID"
+// @Success 200 {array} structs.ReservationOrder
+// @Failure 500 {object} map[string]string
+// @Router /reservations/{id}/orders [get]
 func GetOrdersByReservationID(c *gin.Context, DB *sql.DB) {
 	reservationID := c.Param("id")
 	var orders []structs.ReservationOrder
@@ -36,6 +46,18 @@ func GetOrdersByReservationID(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, orders)
 }
 
+// CreateOrder menambahkan item menu ke dalam reservasi
+// @Summary Tambah pesanan baru
+// @Description Menambahkan item menu (menu_item_id) dan jumlahnya ke dalam reservasi tertentu
+// @Tags ReservationOrder
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path int true "Reservation ID"
+// @Param order body structs.ReservationOrder true "Data Pesanan Item"
+// @Success 201 {object} structs.ReservationOrder
+// @Failure 400 {object} map[string]string
+// @Router /reservations/{id}/orders [post]
 func CreateOrder(c *gin.Context, DB *sql.DB) {
 	reservationID := c.Param("id")
 	var order structs.ReservationOrder
@@ -53,6 +75,19 @@ func CreateOrder(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusCreated, order)
 }
 
+// UpdateOrder mengubah kuantitas pesanan
+// @Summary Update kuantitas pesanan
+// @Description Mengubah jumlah pesanan berdasarkan Order ID dan Reservation ID
+// @Tags ReservationOrder
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path int true "Reservation ID"
+// @Param order_id path int true "Order ID"
+// @Param order body structs.ReservationOrder true "Update Kuantitas (cukup field quantity)"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Router /reservations/{id}/orders/{order_id} [put]
 func UpdateOrder(c *gin.Context, DB *sql.DB) {
 	reservationID := c.Param("id")
 	orderID := c.Param("order_id")
@@ -72,6 +107,15 @@ func UpdateOrder(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, gin.H{"message": "Order updated successfully"})
 }
 
+// DeleteOrder menghapus item dari pesanan
+// @Summary Hapus pesanan item
+// @Description Menghapus satu item menu yang sudah dipesan dari daftar reservasi
+// @Tags ReservationOrder
+// @Security BearerAuth
+// @Param id path int true "Reservation ID"
+// @Param order_id path int true "Order ID"
+// @Success 200 {object} map[string]string
+// @Router /reservations/{id}/orders/{order_id} [delete]
 func DeleteOrder(c *gin.Context, DB *sql.DB) {
 	reservationID := c.Param("id")
 	orderID := c.Param("order_id")

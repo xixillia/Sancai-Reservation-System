@@ -52,6 +52,21 @@ definitions:
       table_id:
         type: integer
     type: object
+  structs.ReservationOrder:
+    properties:
+      id:
+        type: integer
+      menu_item_id:
+        type: integer
+      menu_item_name:
+        type: string
+      price_at_order:
+        type: number
+      quantity:
+        type: integer
+      reservation_id:
+        type: integer
+    type: object
   structs.Table:
     properties:
       capacity:
@@ -311,7 +326,7 @@ paths:
       summary: Login user
       tags:
       - User
-  /menu:
+  /menus:
     get:
       description: Mengambil daftar lengkap item menu makanan dan minuman
       produces:
@@ -363,7 +378,7 @@ paths:
       summary: Tambah menu baru
       tags:
       - Menu
-  /menu/{id}:
+  /menus/{id}:
     delete:
       description: Menghapus item menu dari database berdasarkan ID
       parameters:
@@ -458,7 +473,7 @@ paths:
       summary: Update data menu
       tags:
       - Menu
-  /menu/{id}/availability:
+  /menus/{id}/availability:
     patch:
       consumes:
       - application/json
@@ -673,6 +688,138 @@ paths:
       summary: Update data reservasi
       tags:
       - Reservation
+  /reservations/{id}/orders:
+    get:
+      description: Mengambil semua item menu yang dipesan beserta kuantitas dan harga
+        saat dipesan
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/structs.ReservationOrder'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil daftar pesanan per reservasi
+      tags:
+      - ReservationOrder
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan item menu (menu_item_id) dan jumlahnya ke dalam reservasi
+        tertentu
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Data Pesanan Item
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/structs.ReservationOrder'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/structs.ReservationOrder'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Tambah pesanan baru
+      tags:
+      - ReservationOrder
+  /reservations/{id}/orders/{order_id}:
+    delete:
+      description: Menghapus satu item menu yang sudah dipesan dari daftar reservasi
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Hapus pesanan item
+      tags:
+      - ReservationOrder
+    put:
+      consumes:
+      - application/json
+      description: Mengubah jumlah pesanan berdasarkan Order ID dan Reservation ID
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: integer
+      - description: Update Kuantitas (cukup field quantity)
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/structs.ReservationOrder'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update kuantitas pesanan
+      tags:
+      - ReservationOrder
   /reservations/{id}/status:
     patch:
       consumes:
