@@ -206,7 +206,7 @@ func DeleteTable(c *gin.Context, DB *sql.DB) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Table ID"
-// @Param status body struct{Status string `json:"status" example:"available"`} true "Status Baru"
+// @Param status body structs.Table true "Status Baru (Cukup isi field status)"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Router /tables/{id}/status [patch]

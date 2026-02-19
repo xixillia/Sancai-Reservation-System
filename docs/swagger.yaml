@@ -7,6 +7,17 @@ definitions:
       password:
         type: string
     type: object
+  structs.Table:
+    properties:
+      capacity:
+        type: integer
+      id:
+        type: integer
+      status:
+        type: string
+      table_number:
+        type: string
+    type: object
   structs.User:
     properties:
       created_at:
@@ -57,7 +68,7 @@ paths:
             type: object
       summary: Login user
       tags:
-      - auth
+      - User
   /register:
     post:
       consumes:
@@ -94,5 +105,244 @@ paths:
             type: object
       summary: Register user
       tags:
-      - auth
+      - User
+  /tables:
+    get:
+      description: Mengambil daftar lengkap meja beserta statusnya
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/structs.Table'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil semua meja
+      tags:
+      - Tables
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan meja ke sistem (Admin Only)
+      parameters:
+      - description: Data Meja
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/structs.Table'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/structs.Table'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Tambah meja baru
+      tags:
+      - Tables
+  /tables/{id}:
+    delete:
+      description: Menghapus meja jika tidak ada reservasi aktif di masa depan
+      parameters:
+      - description: Table ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Hapus meja
+      tags:
+      - Tables
+    get:
+      description: Mengambil data detail satu meja menggunakan parameter ID
+      parameters:
+      - description: Table ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/structs.Table'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil meja berdasarkan ID
+      tags:
+      - Tables
+    put:
+      consumes:
+      - application/json
+      description: Mengubah nomor meja, kapasitas, atau status
+      parameters:
+      - description: Table ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Data Meja
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/structs.Table'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update info meja
+      tags:
+      - Tables
+  /tables/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Mengubah status (available/reserved/occupied) secara spesifik
+      parameters:
+      - description: Table ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Status Baru (Cukup isi field status)
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/structs.Table'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update status meja
+      tags:
+      - Tables
+  /tables/available:
+    get:
+      description: Mencari meja berdasarkan jumlah tamu dan waktu tertentu yang tidak
+        bentrok dengan reservasi lain
+      parameters:
+      - description: 'Format: YYYY-MM-DD HH:MM:SS'
+        example: '"2026-02-20 19:00:00"'
+        in: query
+        name: datetime
+        required: true
+        type: string
+      - description: Jumlah tamu
+        example: 4
+        in: query
+        name: guests
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/structs.Table'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Cari meja tersedia
+      tags:
+      - Tables
 swagger: "2.0"
