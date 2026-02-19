@@ -1,11 +1,43 @@
 basePath: /api
 definitions:
+  structs.Customer:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+      user_id:
+        type: integer
+    type: object
   structs.LoginInput:
     properties:
       email:
         type: string
       password:
         type: string
+    type: object
+  structs.Reservation:
+    properties:
+      created_at:
+        type: string
+      customer_id:
+        type: integer
+      id:
+        type: integer
+      number_of_guests:
+        type: integer
+      reservation_datetime:
+        type: string
+      status:
+        type: string
+      table_id:
+        type: integer
     type: object
   structs.Table:
     properties:
@@ -42,6 +74,202 @@ info:
   title: Sancai API
   version: "1.0"
 paths:
+  /customers:
+    get:
+      description: Mengambil data lengkap semua customer yang terdaftar
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/structs.Customer'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil semua customer
+      tags:
+      - Customer
+    post:
+      consumes:
+      - application/json
+      description: Mendaftarkan customer baru dengan validasi email dan nomor telepon
+        unik
+      parameters:
+      - description: Data Customer
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/structs.Customer'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/structs.Customer'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Tambah customer
+      tags:
+      - Customer
+  /customers/{id}:
+    delete:
+      description: Menghapus data customer secara permanen dari database
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Hapus customer
+      tags:
+      - Customer
+    get:
+      description: Mengambil data detail satu customer menggunakan parameter ID
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/structs.Customer'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil customer berdasarkan ID
+      tags:
+      - Customer
+    put:
+      consumes:
+      - application/json
+      description: Mengubah nama, email, atau telepon customer berdasarkan ID
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Data Customer
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/structs.Customer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update data customer
+      tags:
+      - Customer
+  /customers/{id}/reservations:
+    get:
+      description: Mengambil semua daftar reservasi yang pernah dibuat oleh customer
+        tertentu
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/structs.Reservation'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Riwayat reservasi customer
+      tags:
+      - Customer
   /login:
     post:
       consumes:

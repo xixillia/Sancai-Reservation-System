@@ -1,13 +1,15 @@
 ﻿package structs
 
+import "time"
+
 type User struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	Role      string `json:"role"`
-	IsActive  bool   `json:"is_active"`
-	CreatedAt string `json:"created_at"`
+	ID        int       `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	Role      string    `json:"role"`
+	IsActive  bool      `json:"is_active"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type LoginInput struct {
@@ -16,12 +18,12 @@ type LoginInput struct {
 }
 
 type Customer struct {
-	ID        int    `json:"id"`
-	UserID    int    `json:"user_id"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
-	Phone     string `json:"phone"`
-	CreatedAt string `json:"created_at"`
+	ID        int       `json:"id"`
+	UserID    int       `json:"user_id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Phone     string    `json:"phone"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Table struct {
@@ -32,13 +34,13 @@ type Table struct {
 }
 
 type Reservation struct {
-	ID                  int    `json:"id"`
-	CustomerID          int    `json:"customer_id"`
-	TableID             int    `json:"table_id"`
-	ReservationDatetime string `json:"reservation_datetime"`
-	NumberOfGuests      int    `json:"number_of_guests"`
-	Status              string `json:"status"`
-	CreatedAt           string `json:"created_at"`
+	ID                  int       `json:"id"`
+	CustomerID          int       `json:"customer_id"`
+	TableID             int       `json:"table_id"`
+	ReservationDatetime string    `json:"reservation_datetime"`
+	NumberOfGuests      int       `json:"number_of_guests"`
+	Status              string    `json:"status"`
+	CreatedAt           time.Time `json:"created_at"`
 }
 
 type MenuItem struct {

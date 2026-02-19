@@ -170,7 +170,7 @@ func DeleteTable(c *gin.Context, DB *sql.DB) {
 
 	// Tidak boleh hapus meja kalau masih ada reservasi future
 	var existingID int
-	err := DB.QueryRow("SELECT id FROM reservations WHERE table_id = $1 AND reservation_time > NOW()", id).Scan(&existingID)
+	err := DB.QueryRow("SELECT id FROM reservations WHERE table_id = $1 AND reservation_datetime > NOW()", id).Scan(&existingID)
 	if err != sql.ErrNoRows {
 		if err == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot delete table with future reservations"})

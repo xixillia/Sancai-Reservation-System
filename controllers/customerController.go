@@ -9,6 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetCustomers menampilkan semua daftar customer
+// @Summary Ambil semua customer
+// @Description Mengambil data lengkap semua customer yang terdaftar
+// @Tags Customer
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {array} structs.Customer
+// @Failure 500 {object} map[string]string
+// @Router /customers [get]
 func GetCustomers(c *gin.Context, DB *sql.DB) {
 	var customers []structs.Customer
 	rows, err := DB.Query("SELECT id, name, email, phone, created_at FROM customers")
@@ -30,6 +39,17 @@ func GetCustomers(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, customers)
 }
 
+// GetCustomerByID menampilkan detail satu customer
+// @Summary Ambil customer berdasarkan ID
+// @Description Mengambil data detail satu customer menggunakan parameter ID
+// @Tags Customer
+// @Security BearerAuth
+// @Produce json
+// @Param id path int true "Customer ID"
+// @Success 200 {object} structs.Customer
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /customers/{id} [get]
 func GetCustomerByID(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var customer structs.Customer
@@ -45,6 +65,18 @@ func GetCustomerByID(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, customer)
 }
 
+// CreateCustomer menambah customer baru
+// @Summary Tambah customer
+// @Description Mendaftarkan customer baru dengan validasi email dan nomor telepon unik
+// @Tags Customer
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param customer body structs.Customer true "Data Customer"
+// @Success 201 {object} structs.Customer
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /customers [post]
 func CreateCustomer(c *gin.Context, DB *sql.DB) {
 	var customer structs.Customer
 	if err := c.ShouldBindJSON(&customer); err != nil {
@@ -94,6 +126,19 @@ func CreateCustomer(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusCreated, customer)
 }
 
+// UpdateCustomer memperbarui data customer
+// @Summary Update data customer
+// @Description Mengubah nama, email, atau telepon customer berdasarkan ID
+// @Tags Customer
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path int true "Customer ID"
+// @Param customer body structs.Customer true "Update Data Customer"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /customers/{id} [put]
 func UpdateCustomer(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var customer structs.Customer
@@ -151,8 +196,26 @@ func UpdateCustomer(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, gin.H{"message": "Customer updated successfully"})
 }
 
+// DeleteCustomer menghapus data customer
+// @Summary Hapus customer
+// @Description Menghapus data customer secara permanen dari database
+// @Tags Customer
+// @Security BearerAuth
+// @Param id path int true "Customer ID"
+// @Success 200 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /customers/{id} [delete]
 func DeleteCustomer(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
+
+	var count int
+	DB.QueryRow("SELECT COUNT(*) FROM reservations WHERE customer_id = $1", id).Scan(&count)
+	if count > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot delete customer with existing reservations"})
+		return
+	}
+
 	query := "DELETE FROM customers WHERE id = $1"
 	result, err := DB.Exec(query, id)
 	if err != nil {
@@ -171,6 +234,16 @@ func DeleteCustomer(c *gin.Context, DB *sql.DB) {
 	c.JSON(http.StatusOK, gin.H{"message": "Customer deleted successfully"})
 }
 
+// GetReservationsByCustomerID melihat riwayat reservasi customer
+// @Summary Riwayat reservasi customer
+// @Description Mengambil semua daftar reservasi yang pernah dibuat oleh customer tertentu
+// @Tags Customer
+// @Security BearerAuth
+// @Produce json
+// @Param id path int true "Customer ID"
+// @Success 200 {array} structs.Reservation
+// @Failure 500 {object} map[string]string
+// @Router /customers/{id}/reservations [get]
 func GetReservationsByCustomerID(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var reservations []structs.Reservation
