@@ -7,6 +7,23 @@ definitions:
       password:
         type: string
     type: object
+  structs.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+    type: object
 info:
   contact: {}
   description: API restoran
@@ -39,6 +56,43 @@ paths:
             additionalProperties: true
             type: object
       summary: Login user
+      tags:
+      - auth
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Mendaftarkan user baru ke sistem dengan name, email, password,
+        dan role
+      parameters:
+      - description: Data User Baru
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/structs.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"message": "user registered"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: '{"error": "Invalid email format / Email already exists"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "could not create user"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register user
       tags:
       - auth
 swagger: "2.0"

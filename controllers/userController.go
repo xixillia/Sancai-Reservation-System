@@ -11,6 +11,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Register user baru
+// @Summary Register user
+// @Description Mendaftarkan user baru ke sistem dengan name, email, password, dan role
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param user body structs.User true "Data User Baru"
+// @Success 200 {object} map[string]string "{"message": "user registered"}"
+// @Failure 400 {object} map[string]string "{"error": "Invalid email format / Email already exists"}"
+// @Failure 500 {object} map[string]string "{"error": "could not create user"}"
+// @Router /register [post]
 func Register(c *gin.Context, db *sql.DB) {
 	var user structs.User
 
