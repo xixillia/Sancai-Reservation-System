@@ -119,7 +119,7 @@ func CreateReservation(c *gin.Context, DB *sql.DB) {
 
 	// tables.capacity >= number_of_guests
 	var capacity int
-	DB.QueryRow("SELECT capacity FROM tables WHEREid = $1", reservation.TableID).Scan(&capacity)
+	DB.QueryRow("SELECT capacity FROM tables WHERE id = $1", reservation.TableID).Scan(&capacity)
 	if reservation.NumberOfGuests > capacity {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Number of guests exceeds table capacity"})
 		return
