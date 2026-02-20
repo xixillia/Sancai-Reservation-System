@@ -91,13 +91,13 @@ func CreateReservation(c *gin.Context, DB *sql.DB) {
 	}
 
 	var count int
-	DB.QueryRow("SELECT COUNT(*) FROM customers WHERE customer_id = $1", reservation.CustomerID).Scan(&count)
+	DB.QueryRow("SELECT COUNT(*) FROM customers WHERE id = $1", reservation.CustomerID).Scan(&count)
 	if count == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID does not exist"})
 		return
 	}
 
-	DB.QueryRow("SELECT COUNT(*) FROM tables WHERE table_id = $1", reservation.TableID).Scan(&count)
+	DB.QueryRow("SELECT COUNT(*) FROM tables WHERE id = $1", reservation.TableID).Scan(&count)
 	if count == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Table ID does not exist"})
 		return
@@ -119,7 +119,7 @@ func CreateReservation(c *gin.Context, DB *sql.DB) {
 
 	// tables.capacity >= number_of_guests
 	var capacity int
-	DB.QueryRow("SELECT capacity FROM tables WHERE table_id = $1", reservation.TableID).Scan(&capacity)
+	DB.QueryRow("SELECT capacity FROM tables WHEREid = $1", reservation.TableID).Scan(&capacity)
 	if reservation.NumberOfGuests > capacity {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Number of guests exceeds table capacity"})
 		return
@@ -178,13 +178,13 @@ func UpdateReservation(c *gin.Context, DB *sql.DB) {
 	}
 
 	var count int
-	DB.QueryRow("SELECT COUNT(*) FROM customers WHERE customer_id = $1", reservation.CustomerID).Scan(&count)
+	DB.QueryRow("SELECT COUNT(*) FROM customers WHERE id = $1", reservation.CustomerID).Scan(&count)
 	if count == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID does not exist"})
 		return
 	}
 
-	DB.QueryRow("SELECT COUNT(*) FROM tables WHERE table_id = $1", reservation.TableID).Scan(&count)
+	DB.QueryRow("SELECT COUNT(*) FROM tables WHERE id = $1", reservation.TableID).Scan(&count)
 	if count == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Table ID does not exist"})
 		return
@@ -206,7 +206,7 @@ func UpdateReservation(c *gin.Context, DB *sql.DB) {
 
 	// tables.capacity >= number_of_guests
 	var capacity int
-	DB.QueryRow("SELECT capacity FROM tables WHERE table_id = $1", reservation.TableID).Scan(&capacity)
+	DB.QueryRow("SELECT capacity FROM tables WHERE id = $1", reservation.TableID).Scan(&capacity)
 	if reservation.NumberOfGuests > capacity {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Number of guests exceeds table capacity"})
 		return
