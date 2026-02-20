@@ -81,6 +81,10 @@ func CreateReservation(c *gin.Context, DB *sql.DB) {
 		return
 	}
 
+	if reservation.Status == "" {
+		reservation.Status = "pending"
+	}
+
 	if reservation.CustomerID == 0 || reservation.TableID == 0 || reservation.NumberOfGuests <= 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "CustomerID, TableID, and NumberOfGuests are required"})
 		return
@@ -226,8 +230,8 @@ func UpdateReservation(c *gin.Context, DB *sql.DB) {
 		return
 	}
 
-	query := "UPDATE reservations SET customer_id = $1, table_id = $2, reservation_datetime = $3, status = $4 WHERE id = $5"
-	result, err := DB.Exec(query, reservation.CustomerID, reservation.TableID, reservation.ReservationDatetime, reservation.Status, id)
+	query := "UPDATE reservations SET customer_id = $1, table_id = $2, reservation_datetime = $3 WHERE id = $4"
+	result, err := DB.Exec(query, reservation.CustomerID, reservation.TableID, reservation.ReservationDatetime, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
