@@ -19,7 +19,7 @@ type LoginInput struct {
 
 type Customer struct {
 	ID        int       `json:"id"`
-	UserID    int       `json:"user_id"`
+	UserID    *int      `json:"user_id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
 	Phone     string    `json:"phone"`
