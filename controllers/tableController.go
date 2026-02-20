@@ -4,7 +4,6 @@ import (
 	"Sancai/structs"
 	"database/sql"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -255,15 +254,7 @@ func UpdateTableStatus(c *gin.Context, DB *sql.DB) {
 // @Failure 500 {object} map[string]string
 // @Router /tables/available [get]
 func GetAvailableTables(c *gin.Context, DB *sql.DB) {
-	dateTimeStr := c.Query("datetime")
-
-	// Konversi string ke format time.Time di Go
-	layout := "2006-01-02 15:04:05"
-	datetime, err := time.Parse(layout, dateTimeStr)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "Wrong datetime format. Use YYYY-MM-DD HH:MM:SS"})
-		return
-	}
+	datetime := c.Query("datetime")
 	guests := c.Query("guests")
 	var tables []structs.Table
 	query := `
