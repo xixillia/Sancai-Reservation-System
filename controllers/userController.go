@@ -52,8 +52,8 @@ func Register(c *gin.Context, db *sql.DB) {
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
 	user.Password = string(hashed)
 
-	query := "INSERT INTO users (name, email, password, role, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING id"
-	err = db.QueryRow(query, user.Name, user.Email, user.Password, user.Role, user.IsActive).Scan(&user.ID)
+	query := "INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id"
+	err = db.QueryRow(query, user.Name, user.Email, user.Password, user.Role).Scan(&user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not create user"})
 		return

@@ -29,7 +29,7 @@ CREATE TABLE customers (
 -- tables (meja restoran)
 CREATE TABLE tables (
   id BIGSERIAL PRIMARY KEY,
-  table_number INT NOT NULL,
+  table_number VARCHAR(50) NOT NULL,
   capacity INT NOT NULL,
   status VARCHAR(50) NOT NULL
 );
@@ -41,7 +41,7 @@ CREATE TABLE reservations (
   table_id BIGINT NOT NULL,
   reservation_datetime TIMESTAMP NOT NULL,
   number_of_guests INT NOT NULL,
-  status VARCHAR(50) NOT NULL,
+  status VARCHAR(50) NOT NULL DEFAULT 'pending',
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 
   CONSTRAINT fk_reservations_customer

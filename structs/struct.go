@@ -37,7 +37,7 @@ type Reservation struct {
 	ID                  int       `json:"id"`
 	CustomerID          int       `json:"customer_id"`
 	TableID             int       `json:"table_id"`
-	ReservationDatetime string    `json:"reservation_datetime"`
+	ReservationDatetime time.Time `json:"reservation_datetime"`
 	NumberOfGuests      int       `json:"number_of_guests"`
 	Status              string    `json:"status"`
 	CreatedAt           time.Time `json:"created_at"`

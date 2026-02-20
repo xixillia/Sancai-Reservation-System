@@ -30,6 +30,7 @@ func StartServer(db *sql.DB) *gin.Engine {
 		{
 			customerRoutes.GET("", func(c *gin.Context) { controllers.GetCustomers(c, db) })
 			customerRoutes.GET("/:id", func(c *gin.Context) { controllers.GetCustomerByID(c, db) })
+			customerRoutes.GET("/:id/reservations", func(c *gin.Context) { controllers.GetReservationsByCustomerID	(c, db) })
 			customerRoutes.POST("", func(c *gin.Context) { controllers.CreateCustomer(c, db) })
 			customerRoutes.PUT("/:id", func(c *gin.Context) { controllers.UpdateCustomer(c, db) })
 			customerRoutes.DELETE("/:id", func(c *gin.Context) { controllers.DeleteCustomer(c, db) })
@@ -72,6 +73,7 @@ func StartServer(db *sql.DB) *gin.Engine {
 		{
 			tableRoutes.GET("", func(c *gin.Context) { controllers.GetTables(c, db) })
 			tableRoutes.GET("/:id", func(c *gin.Context) { controllers.GetTablesByID(c, db) })
+			tableRoutes.GET("/available", func(c *gin.Context) { controllers.GetAvailableTables(c, db) })
 			tableRoutes.POST("", func(c *gin.Context) { controllers.CreateTable(c, db) })
 			tableRoutes.PUT("/:id", func(c *gin.Context) { controllers.UpdateTable(c, db) })
 			tableRoutes.PATCH("/:id/status", func(c *gin.Context) { controllers.UpdateTableStatus(c, db) })

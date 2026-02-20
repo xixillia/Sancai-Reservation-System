@@ -4,6 +4,7 @@ import (
 	"Sancai/structs"
 	"database/sql"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -50,8 +51,8 @@ func GetReservations(c *gin.Context, DB *sql.DB) {
 func GetReservationByID(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var reservation structs.Reservation
-	query := "SELECT id, customer_id, table_id, reservation_datetime, status FROM reservations WHERE id = $1"
-	if err := DB.QueryRow(query, id).Scan(&reservation.ID, &reservation.CustomerID, &reservation.TableID, &reservation.ReservationDatetime, &reservation.Status); err != nil {
+	query := "SELECT id, customer_id, table_id, reservation_datetime, status, number_of_guests, created_at FROM reservations WHERE id = $1"
+	if err := DB.QueryRow(query, id).Scan(&reservation.ID, &reservation.CustomerID, &reservation.TableID, &reservation.ReservationDatetime, &reservation.Status, &reservation.NumberOfGuests, &reservation.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
 		} else {
@@ -80,8 +81,66 @@ func CreateReservation(c *gin.Context, DB *sql.DB) {
 		return
 	}
 
-	query := "INSERT INTO reservations (customer_id, table_id, reservation_datetime, status) VALUES ($1, $2, $3, $4) RETURNING id"
-	err := DB.QueryRow(query, reservation.CustomerID, reservation.TableID, reservation.ReservationDatetime, reservation.Status).Scan(&reservation.ID)
+	if reservation.CustomerID == 0 || reservation.TableID == 0 || reservation.NumberOfGuests <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "CustomerID, TableID, and NumberOfGuests are required"})
+		return
+	}
+	if reservation.ReservationDatetime.IsZero() {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ReservationDatetime is required and must be a valid datetime"})
+		return
+	}
+
+	var count int
+	DB.QueryRow("SELECT COUNT(*) FROM customers WHERE customer_id = $1", reservation.CustomerID).Scan(&count)
+	if count == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID does not exist"})
+		return
+	}
+
+	DB.QueryRow("SELECT COUNT(*) FROM tables WHERE table_id = $1", reservation.TableID).Scan(&count)
+	if count == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Table ID does not exist"})
+		return
+	}
+
+	// Tidak boleh booking di masa lalu
+	if reservation.ReservationDatetime.Before(time.Now()) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot book in the past"})
+		return
+	}
+
+	// Meja yang sama minimal jarak 1 jam
+	var existingID int
+	DB.QueryRow("SELECT id FROM reservations WHERE table_id = $1 AND ABS(EXTRACT(EPOCH FROM (reservation_datetime - $2::timestamp)) / 60) < 60", reservation.TableID, reservation.ReservationDatetime).Scan(&existingID)
+	if existingID != 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Table is already booked with another reservation"})
+		return
+	}
+
+	// tables.capacity >= number_of_guests
+	var capacity int
+	DB.QueryRow("SELECT capacity FROM tables WHERE table_id = $1", reservation.TableID).Scan(&capacity)
+	if reservation.NumberOfGuests > capacity {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Number of guests exceeds table capacity"})
+		return
+	}
+
+	// Status hanya boleh: pending, confirmed, cancelled, completed, kosong (default pending)
+	if reservation.Status != "pending" && reservation.Status != "confirmed" && reservation.Status != "cancelled" && reservation.Status != "completed" && reservation.Status != "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Status must be 'pending', 'confirmed', 'cancelled', or 'completed'"})
+		return
+	}
+
+	// Customer tidak boleh punya 2 reservasi aktif di jam yang sama
+	var activeID int
+	DB.QueryRow("SELECT id FROM reservations WHERE customer_id = $1 AND ABS(EXTRACT(EPOCH FROM (reservation_datetime - $2::timestamp)) / 60) < 60 AND status IN ('pending', 'confirmed')", reservation.CustomerID, reservation.ReservationDatetime).Scan(&activeID)
+	if activeID != 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer already has an active reservation at the same time"})
+		return
+	}
+
+	query := "INSERT INTO reservations (customer_id, table_id, reservation_datetime, status, number_of_guests) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+	err := DB.QueryRow(query, reservation.CustomerID, reservation.TableID, reservation.ReservationDatetime, reservation.Status, reservation.NumberOfGuests).Scan(&reservation.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -106,6 +165,64 @@ func UpdateReservation(c *gin.Context, DB *sql.DB) {
 	var reservation structs.Reservation
 	if err := c.ShouldBindJSON(&reservation); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if reservation.CustomerID == 0 || reservation.TableID == 0 || reservation.NumberOfGuests <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "CustomerID, TableID, and NumberOfGuests are required"})
+		return
+	}
+	if reservation.ReservationDatetime.IsZero() {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ReservationDatetime is required and must be a valid datetime"})
+		return
+	}
+
+	var count int
+	DB.QueryRow("SELECT COUNT(*) FROM customers WHERE customer_id = $1", reservation.CustomerID).Scan(&count)
+	if count == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID does not exist"})
+		return
+	}
+
+	DB.QueryRow("SELECT COUNT(*) FROM tables WHERE table_id = $1", reservation.TableID).Scan(&count)
+	if count == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Table ID does not exist"})
+		return
+	}
+
+	// Tidak boleh booking di masa lalu
+	if reservation.ReservationDatetime.Before(time.Now()) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot book in the past"})
+		return
+	}
+
+	// Meja yang sama minimal jarak 1 jam
+	var existingID int
+	DB.QueryRow("SELECT id FROM reservations WHERE table_id = $1 AND id != $2 AND ABS(EXTRACT(EPOCH FROM (reservation_datetime - $3::timestamp)) / 60) < 60", reservation.TableID, id, reservation.ReservationDatetime).Scan(&existingID)
+	if existingID != 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Table is already booked with another reservation"})
+		return
+	}
+
+	// tables.capacity >= number_of_guests
+	var capacity int
+	DB.QueryRow("SELECT capacity FROM tables WHERE table_id = $1", reservation.TableID).Scan(&capacity)
+	if reservation.NumberOfGuests > capacity {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Number of guests exceeds table capacity"})
+		return
+	}
+
+	// Status hanya boleh: pending, confirmed, cancelled, completed, kosong (default pending)
+	if reservation.Status != "pending" && reservation.Status != "confirmed" && reservation.Status != "cancelled" && reservation.Status != "completed" && reservation.Status != "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Status must be 'pending', 'confirmed', 'cancelled', or 'completed'"})
+		return
+	}
+
+	// Customer tidak boleh punya 2 reservasi aktif di jam yang sama
+	var activeID int
+	DB.QueryRow("SELECT id FROM reservations WHERE customer_id = $1 AND id != $2 AND ABS(EXTRACT(EPOCH FROM (reservation_datetime - $3::timestamp)) / 60) < 60 AND status IN ('pending', 'confirmed')", reservation.CustomerID, id, reservation.ReservationDatetime).Scan(&activeID)
+	if activeID != 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer already has an active reservation at the same time"})
 		return
 	}
 
@@ -150,6 +267,12 @@ func UpdateReservationStatus(c *gin.Context, DB *sql.DB) {
 		return
 	}
 
+	// Status hanya boleh: pending, confirmed, cancelled, completed, kosong (default pending)
+	if status.Status != "pending" && status.Status != "confirmed" && status.Status != "cancelled" && status.Status != "completed" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Status must be 'pending', 'confirmed', 'cancelled', or 'completed'"})
+		return
+	}
+
 	query := "UPDATE reservations SET status = $1 WHERE id = $2"
 	result, err := DB.Exec(query, status.Status, id)
 	if err != nil {
@@ -182,23 +305,37 @@ func UpdateReservationStatus(c *gin.Context, DB *sql.DB) {
 // @Router /reservations/{id} [delete]
 func DeleteReservation(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
-	query := "DELETE FROM reservations WHERE id = $1"
-	result, err := DB.Exec(query, id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	if rowsAffected == 0 {
+	// cek apakah reservasi ada
+	var existingID int
+	DB.QueryRow("SELECT id FROM reservations WHERE id = $1", id).Scan(&existingID)
+	if existingID == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
 		return
 	}
+
+	// status tidak boleh completed / confirmed
+	var status string
+	DB.QueryRow("SELECT status FROM reservations WHERE id = $1", id).Scan(&status)
+	if status == "completed" || status == "confirmed" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot delete a reservation that is completed or confirmed"})
+		return
+	}
+
+	// Hapus juga reservation_orders terkait
+	_, err := DB.Exec("DELETE FROM reservation_orders WHERE reservation_id = $1", id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	query := "DELETE FROM reservations WHERE id = $1"
+	_, err = DB.Exec(query, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Reservation deleted successfully"})
 }
 

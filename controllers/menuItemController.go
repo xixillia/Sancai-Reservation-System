@@ -19,7 +19,7 @@ import (
 // @Router /menus [get]
 func GetMenuItems(c *gin.Context, DB *sql.DB) {
 	var menuItems []structs.MenuItem
-	rows, err := DB.Query("SELECT id, name, price, is_available FROM menu_items")
+	rows, err := DB.Query("SELECT id, name, price, category, is_available FROM menu_items")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -28,7 +28,7 @@ func GetMenuItems(c *gin.Context, DB *sql.DB) {
 
 	for rows.Next() {
 		var menuItem structs.MenuItem
-		if err := rows.Scan(&menuItem.ID, &menuItem.Name, &menuItem.Price, &menuItem.IsAvailable); err != nil {
+		if err := rows.Scan(&menuItem.ID, &menuItem.Name, &menuItem.Price, &menuItem.Category, &menuItem.IsAvailable); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -52,8 +52,8 @@ func GetMenuItems(c *gin.Context, DB *sql.DB) {
 func GetMenuItemByID(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var menuItem structs.MenuItem
-	query := "SELECT id, name, price, is_available FROM menu_items WHERE id = $1"
-	if err := DB.QueryRow(query, id).Scan(&menuItem.ID, &menuItem.Name, &menuItem.Price, &menuItem.IsAvailable); err != nil {
+	query := "SELECT id, name, price, category, is_available FROM menu_items WHERE id = $1"
+	if err := DB.QueryRow(query, id).Scan(&menuItem.ID, &menuItem.Name, &menuItem.Price, &menuItem.Category, &menuItem.IsAvailable); err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Menu item not found"})
 		} else {
@@ -81,9 +81,19 @@ func CreateMenuItem(c *gin.Context, DB *sql.DB) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	
+	if menuItem.Name == "" || menuItem.Price <= 0 || menuItem.Category == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Name, price, and category are required and price must be greater than 0"})
+		return
+	}
 
-	query := "INSERT INTO menu_items (name, price, is_available) VALUES ($1, $2, $3) RETURNING id"
-	if err := DB.QueryRow(query, menuItem.Name, menuItem.Price, menuItem.IsAvailable).Scan(&menuItem.ID); err != nil {
+	if menuItem.Category != "main course" && menuItem.Category != "drink" && menuItem.Category != "dessert" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Category must be 'main course', 'drink', or 'dessert'"})
+		return
+	}
+
+	query := "INSERT INTO menu_items (name, price, category, is_available) VALUES ($1, $2, $3, $4) RETURNING id"
+	if err := DB.QueryRow(query, menuItem.Name, menuItem.Price, menuItem.Category, menuItem.IsAvailable).Scan(&menuItem.ID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -109,9 +119,19 @@ func UpdateMenuItem(c *gin.Context, DB *sql.DB) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	
+	if menuItem.Name == "" || menuItem.Price <= 0 || menuItem.Category == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Name, price, and category are required and price must be greater than 0"})
+		return
+	}
 
-	query := "UPDATE menu_items SET name = $1, price = $2, is_available = $3 WHERE id = $4"
-	result, err := DB.Exec(query, menuItem.Name, menuItem.Price, menuItem.IsAvailable, id)
+	if menuItem.Category != "main course" && menuItem.Category != "drink" && menuItem.Category != "dessert" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Category must be 'main course', 'drink', or 'dessert'"})
+		return
+	}
+
+	query := "UPDATE menu_items SET name = $1, price = $2, category = $3, is_available = $4 WHERE id = $5"
+	result, err := DB.Exec(query, menuItem.Name, menuItem.Price, menuItem.Category, menuItem.IsAvailable, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -141,6 +161,17 @@ func UpdateMenuItem(c *gin.Context, DB *sql.DB) {
 // @Router /menus/{id} [delete]
 func DeleteMenuItem(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
+		
+	// Tidak boleh hapus menu kalau masih ada di reservation_orders
+	var existingID int
+	err := DB.QueryRow("SELECT id FROM reservation_orders WHERE menu_item_id = $1", id).Scan(&existingID)
+	if err != sql.ErrNoRows {
+		if err == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Menu item cannot be deleted because it is still part of existing orders"})
+		}
+		return
+	}
+
 	query := "DELETE FROM menu_items WHERE id = $1"
 	result, err := DB.Exec(query, id)
 	if err != nil {

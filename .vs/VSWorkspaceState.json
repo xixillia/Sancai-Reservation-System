@@ -1,11 +1,16 @@
 {
   "ExpandedNodes": [
     "",
+    "\\auth",
     "\\controllers",
+    "\\database",
     "\\database\\sql_migrations",
+    "\\docs",
+    "\\ERD",
+    "\\middlewares",
     "\\routers",
     "\\structs"
   ],
-  "SelectedNode": "\\Note.txt",
+  "SelectedNode": "\\database\\sql_migrations\\initiateSql.sql",
   "PreviewInSolutionExplorer": false
 }

@@ -20,7 +20,7 @@ import (
 // @Router /customers [get]
 func GetCustomers(c *gin.Context, DB *sql.DB) {
 	var customers []structs.Customer
-	rows, err := DB.Query("SELECT id, name, email, phone, created_at FROM customers")
+	rows, err := DB.Query("SELECT id, user_id, name, email, phone, created_at FROM customers")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -29,7 +29,7 @@ func GetCustomers(c *gin.Context, DB *sql.DB) {
 
 	for rows.Next() {
 		var customer structs.Customer
-		if err := rows.Scan(&customer.ID, &customer.Name, &customer.Email, &customer.Phone, &customer.CreatedAt); err != nil {
+		if err := rows.Scan(&customer.ID, &customer.UserID, &customer.Name, &customer.Email, &customer.Phone, &customer.CreatedAt); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -53,8 +53,8 @@ func GetCustomers(c *gin.Context, DB *sql.DB) {
 func GetCustomerByID(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var customer structs.Customer
-	query := "SELECT id, name, email, phone, created_at FROM customers WHERE id = $1"
-	if err := DB.QueryRow(query, id).Scan(&customer.ID, &customer.Name, &customer.Email, &customer.Phone, &customer.CreatedAt); err != nil {
+	query := "SELECT id, user_id, name, email, phone, created_at FROM customers WHERE id = $1"
+	if err := DB.QueryRow(query, id).Scan(&customer.ID, &customer.UserID, &customer.Name, &customer.Email, &customer.Phone, &customer.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
 		} else {
@@ -118,8 +118,19 @@ func CreateCustomer(c *gin.Context, DB *sql.DB) {
 		return
 	}
 
-	query := "INSERT INTO customers (name, email, phone) VALUES ($1, $2, $3) RETURNING id"
-	if err := DB.QueryRow(query, customer.Name, customer.Email, customer.Phone).Scan(&customer.ID); err != nil {
+	//unique user_id
+	err = DB.QueryRow("SELECT id FROM customers WHERE user_id = $1", customer.UserID).Scan(&existingID)
+	if err != sql.ErrNoRows {
+		if err == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User ID already exists"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	query := "INSERT INTO customers (name, user_id, email, phone) VALUES ($1, $2, $3, $4) RETURNING id"
+	if err := DB.QueryRow(query, customer.Name, customer.UserID, customer.Email, customer.Phone).Scan(&customer.ID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -175,9 +186,20 @@ func UpdateCustomer(c *gin.Context, DB *sql.DB) {
 		}
 		return
 	}
+	
+	//unique user_id
+	err = DB.QueryRow("SELECT id FROM customers WHERE user_id = $1 AND id != $2", customer.UserID, id).Scan(&existingID)
+	if err != sql.ErrNoRows {
+		if err == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User ID already exists"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
 
-	query := "UPDATE customers SET name = $1, email = $2, phone = $3 WHERE id = $4"
-	result, err := DB.Exec(query, customer.Name, customer.Email, customer.Phone, id)
+	query := "UPDATE customers SET name = $1, user_id = $2, email = $3, phone = $4 WHERE id = $5"
+	result, err := DB.Exec(query, customer.Name, customer.UserID, customer.Email, customer.Phone, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
