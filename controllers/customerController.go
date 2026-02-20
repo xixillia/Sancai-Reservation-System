@@ -53,7 +53,7 @@ func GetCustomers(c *gin.Context, DB *sql.DB) {
 func GetCustomerByID(c *gin.Context, DB *sql.DB) {
 	id := c.Param("id")
 	var customer structs.Customer
-	query := "SELECT id, user_id, name, email, phone, created_at FROM customers WHERE id = $1"
+	query := "SELECT id, COALESCE(user_id, 0) AS user_id, name, email, phone, created_at FROM customers WHERE id = $1"
 	if err := DB.QueryRow(query, id).Scan(&customer.ID, &customer.UserID, &customer.Name, &customer.Email, &customer.Phone, &customer.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
@@ -186,7 +186,7 @@ func UpdateCustomer(c *gin.Context, DB *sql.DB) {
 		}
 		return
 	}
-	
+
 	//unique user_id
 	err = DB.QueryRow("SELECT id FROM customers WHERE user_id = $1 AND id != $2", customer.UserID, id).Scan(&existingID)
 	if err != sql.ErrNoRows {
