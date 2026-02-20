@@ -66,8 +66,8 @@ func CreateOrder(c *gin.Context, DB *sql.DB) {
 		return
 	}
 
-	if order.ReservationID == 0 || order.MenuItemID == 0 || order.Quantity <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ReservationID, MenuItemID, and Quantity are required"})
+	if order.MenuItemID == 0 || order.Quantity <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "MenuItemID and Quantity are required"})
 		return
 	}
 
